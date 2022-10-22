@@ -6,13 +6,14 @@ from config import INFO
 from tqdm.auto import tqdm
 import csv
 
-
 def geo2latlon(ip_address):
+    
     # URL to send the request to
     request_url = 'https://api.findip.net/' + ip_address.strip() + f'/?token={INFO["findiptoken"]}'
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:44.0) Gecko/20100101 Firefox/44.0", "Content-Type": "application/json"}
     
     # Send request and decode the result
-    response = requests.get(request_url)
+    response = requests.get(request_url, headers=headers)
     result = response.content.decode()
     
     # Convert this data into a dictionary
