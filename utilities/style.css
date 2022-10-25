@@ -1,0 +1,8 @@
+.stButton > button {
+    width: 100%;
+    text-align: center;
+}
+
+footer {
+    display: none !important;
+}

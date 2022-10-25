@@ -5,6 +5,8 @@ from dbcnnct import db_connect
 from config import INFO
 from tqdm.auto import tqdm
 import csv
+import argparse
+
 
 def geo2latlon(ip_address):
     
@@ -24,18 +26,27 @@ def geo2latlon(ip_address):
 
 
 def create_geo_info(ip_df, result_fn):
-    result_df = pd.read_csv(result_fn)
-    result_df_ip = result_df[["ip"]]
     
+    # fetch result dataframe
+    try:
+        result_df = pd.read_csv(result_fn)
+    except:
+        headers=['ip', 'lat', 'lon', 'city', 'country', 'continent']
+        
+        with open(result_fn, 'a', encoding='UTF8') as f:
+            writer = csv.writer(f)
+            writer.writerow(headers)
+        
+        result_df = pd.read_csv(result_fn)
+    
+    # diff set of ip_df and result_df
+    result_df_ip = result_df[["ip"]]
     remain_ip_df = pd.concat([ip_df, result_df_ip, result_df_ip]).drop_duplicates(keep=False)
     
-    headers=['ip', 'lat', 'lon', 'city', 'country', 'continent']
-    
+    # to numpy and iterate
     dfnum = remain_ip_df.to_numpy()
-    
     with open(result_fn, 'a', encoding='UTF8') as f:
         writer = csv.writer(f)
-        # writer.writerow(headers)
         
         for ip in tqdm(dfnum):
             row = geo2latlon(ip[0])
@@ -43,6 +54,8 @@ def create_geo_info(ip_df, result_fn):
 
 
 def fetch_distinct_ip_and_save(filename):
+    
+    # fetch ip csv
     try:
         df = pd.read_csv(filename)
     except:
@@ -53,8 +66,14 @@ def fetch_distinct_ip_and_save(filename):
     
     return df
 
-if __name__ == "__main__": 
-    ip_fn = "./cache/ip.csv"
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Create IP GEO MAP')
+    parser.add_argument('--ip_fn')
+    parser.add_argument('--result_fn')
+    args = parser.parse_args()
+    
+    ip_fn = args.ip_fn
+    result_fn = args.result_fn
+    
     ip_df = fetch_distinct_ip_and_save(ip_fn)
-    result_fn = "./cache/ip2geo.csv"
     create_geo_info(ip_df, result_fn)

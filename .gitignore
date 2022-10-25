@@ -1,6 +1,9 @@
 config.py
 
 __pycache__/
+database/
+
 
 *.py[cod]
 *.csv
+
